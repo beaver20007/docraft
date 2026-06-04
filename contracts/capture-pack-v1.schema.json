@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://docraft.pro/schemas/capture-pack-v1.schema.json",
+  "title": "CapturePackZipManifest",
+  "description": "manifest.json inside .capture-pack.zip from Desktop Instructor (source of truth: docraft repo)",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "capture_pack_version",
+    "title",
+    "language",
+    "app_id",
+    "source_tool",
+    "created_at",
+    "steps"
+  ],
+  "properties": {
+    "schema_version": { "const": "capture-pack-v1" },
+    "capture_pack_version": { "type": "string", "pattern": "^[0-9]+$" },
+    "title": { "type": "string", "minLength": 1, "maxLength": 300 },
+    "summary": { "type": "string", "maxLength": 2000 },
+    "language": { "enum": ["ru", "en"] },
+    "app_id": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "query": { "type": "string", "maxLength": 500 },
+    "source_tool": { "const": "desktop-instructor" },
+    "created_at": { "type": "string", "minLength": 10 },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": { "$ref": "#/$defs/zipStep" }
+    },
+    "output_files": {
+      "type": "array",
+      "items": { "type": "string", "maxLength": 255 }
+    },
+    "qa_summary": { "type": "object", "additionalProperties": true },
+    "meta": { "type": "object", "additionalProperties": true }
+  },
+  "$defs": {
+    "zipStep": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["number", "description", "image_file"],
+      "properties": {
+        "number": { "type": "integer", "minimum": 1, "maximum": 20 },
+        "description": { "type": "string", "minLength": 1, "maxLength": 4000 },
+        "tip": { "type": ["string", "null"], "maxLength": 1000 },
+        "image_file": {
+          "type": "string",
+          "pattern": "^images/step_[0-9]{2}\\.png$"
+        },
+        "annotation_target": { "type": "string", "maxLength": 500 },
+        "ui_target_id": { "type": ["string", "null"], "maxLength": 128 },
+        "expected_screen_type": { "type": ["string", "null"], "maxLength": 64 }
+      }
+    }
+  }
+}

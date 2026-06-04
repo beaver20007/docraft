@@ -1,0 +1,28 @@
+{
+  "schema_version": "capture-pack-v1",
+  "capture_pack_version": "1",
+  "title": "AutoCAD: первая линия",
+  "summary": "Минимальный пример для валидации схемы",
+  "language": "ru",
+  "app_id": "autocad",
+  "query": "как провести линию",
+  "source_tool": "desktop-instructor",
+  "created_at": "2026-06-04T12:00:00+00:00",
+  "steps": [
+    {
+      "number": 1,
+      "description": "Откройте чертёж",
+      "tip": null,
+      "image_file": "images/step_01.png",
+      "annotation_target": "главное окно"
+    },
+    {
+      "number": 2,
+      "description": "Запустите команду LINE",
+      "tip": "Или введите LINE в командной строке",
+      "image_file": "images/step_02.png",
+      "annotation_target": "панель рисования"
+    }
+  ],
+  "qa_summary": { "Q5": "RELEASE_OK" }
+}

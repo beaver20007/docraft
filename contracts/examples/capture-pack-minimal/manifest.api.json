@@ -1,0 +1,22 @@
+{
+  "version": "1.0",
+  "source": "desktop-instructor",
+  "title": "AutoCAD: первая линия",
+  "locale": "ru",
+  "steps": [
+    {
+      "step_id": "step-1",
+      "order": 1,
+      "title": "Открыть чертёж",
+      "caption": "Главное окно AutoCAD с пустым чертежом",
+      "image_ref": "step_01.png"
+    },
+    {
+      "step_id": "step-2",
+      "order": 2,
+      "title": "Команда LINE",
+      "caption": "Панель рисования — линия",
+      "image_ref": "step_02.png"
+    }
+  ]
+}
