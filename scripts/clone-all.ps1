@@ -1,9 +1,13 @@
-# Clone DOCRAFT child repositories next to a parent directory.
+# DOCRAFT - clone or update child repositories (Create / Capture / Protect).
+# Run:  cd C:\Projects\docraft
+#       .\scripts\clone-all.ps1
+#       .\scripts\clone-all.ps1 -SkipExisting
+
 param(
-    [string]$ParentDir = (Split-Path $PSScriptRoot -Parent),
-    [string]$PlaybookDir = "",
-    [string]$DesktopDir = "",
-    [string]$MagicalDir = "",
+    [string]$ParentDir = "C:\Projects",
+    [string]$PlaybookDir = "C:\Users\tsvetkov\ai playbook generator",
+    [string]$DesktopDir = "C:\Projects\autocad-instructor",
+    [string]$MagicalDir = "C:\Users\tsvetkov\Documents\magical-pdf",
     [switch]$SkipExisting
 )
 
@@ -13,38 +17,63 @@ $repos = @(
     @{
         Name = "ai-playbook-generator"
         Url  = "https://github.com/beaver20007/ai-playbook-generator.git"
-        Dir  = if ($PlaybookDir) { $PlaybookDir } else { Join-Path $ParentDir "ai-playbook-generator" }
+        Dir  = $PlaybookDir
     },
     @{
         Name = "desktop-instructor"
         Url  = "https://github.com/beaver20007/desktop-instructor.git"
-        Dir  = if ($DesktopDir) { $DesktopDir } else { Join-Path $ParentDir "desktop-instructor" }
+        Dir  = $DesktopDir
     },
     @{
         Name = "magical-pdf"
         Url  = "https://github.com/beaver20007/magical-pdf.git"
-        Dir  = if ($MagicalDir) { $MagicalDir } else { Join-Path (Join-Path $env:USERPROFILE "Documents") "magical-pdf" }
+        Dir  = $MagicalDir
     }
 )
 
-Write-Host "DOCRAFT clone-all — parent: $ParentDir" -ForegroundColor Cyan
+Write-Host "DOCRAFT clone-all" -ForegroundColor Cyan
+Write-Host "  SkipExisting = $SkipExisting" -ForegroundColor DarkGray
+Write-Host ""
 
 foreach ($r in $repos) {
-    if (Test-Path $r.Dir) {
-        if ($SkipExisting) {
-            Write-Host "[skip] $($r.Name) exists: $($r.Dir)" -ForegroundColor Yellow
-            continue
+    $dir = $r.Dir
+    $gitDir = Join-Path $dir ".git"
+
+    if (Test-Path -LiteralPath $dir) {
+        if (Test-Path -LiteralPath $gitDir) {
+            Write-Host "[pull] $($r.Name)" -ForegroundColor Green
+            Write-Host "       $dir" -ForegroundColor DarkGray
+            git -C $dir pull --ff-only
         }
-        Write-Host "[pull] $($r.Name) at $($r.Dir)" -ForegroundColor Green
-        git -C $r.Dir pull --ff-only
+        else {
+            Write-Host "[warn] $($r.Name) - not a git repo: $dir" -ForegroundColor Yellow
+        }
         continue
     }
-    Write-Host "[clone] $($r.Name) -> $($r.Dir)" -ForegroundColor Green
-    git clone $r.Url $r.Dir
+
+    if ($SkipExisting) {
+        Write-Host "[skip] $($r.Name) - missing (-SkipExisting): $dir" -ForegroundColor Yellow
+        continue
+    }
+
+    $parent = Split-Path -LiteralPath $dir -Parent
+    if ($parent -and -not (Test-Path -LiteralPath $parent)) {
+        New-Item -ItemType Directory -Path $parent -Force | Out-Null
+    }
+
+    Write-Host "[clone] $($r.Name)" -ForegroundColor Green
+    Write-Host "       $dir" -ForegroundColor DarkGray
+    git clone $r.Url $dir
 }
 
 Write-Host ""
-Write-Host "Local paths (customize in docs/REPOS.md if different):" -ForegroundColor Cyan
+Write-Host "Local paths:" -ForegroundColor Cyan
 foreach ($r in $repos) {
-    Write-Host "  $($r.Name): $($r.Dir)"
+    if (Test-Path -LiteralPath $r.Dir) {
+        $mark = "ok"
+    }
+    else {
+        $mark = "missing"
+    }
+    Write-Host "  [$mark] $($r.Name): $($r.Dir)"
 }

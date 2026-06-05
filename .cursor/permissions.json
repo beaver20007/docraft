@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "terminalAllowlist": [
+    "cd",
+    "cd C:\\Projects\\docraft",
+    "cd C:/Projects/docraft",
+    "Set-Location",
+    "Set-Location C:\\Projects\\docraft",
+    "git",
+    "git status",
+    "git diff",
+    "git log",
+    "git pull",
+    "git branch",
+    "git -C",
+    "powershell",
+    "pwsh",
+    "python",
+    "pip",
+    "npm",
+    "pytest",
+    ".\\scripts\\clone-all.ps1",
+    "scripts/clone-all.ps1",
+    "python scripts/validate_schemas.py",
+    ".\\scripts\\validate_schemas.py"
+  ],
+  "mcpAllowlist": ["*:*"]
+}
