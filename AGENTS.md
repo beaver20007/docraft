@@ -6,6 +6,14 @@ Rules for AI agents (Cursor, Codex, Claude Code) working on the **ecosystem**, n
 
 This repository is **documentation + contracts + scripts**. Application code lives in child repos ([REPOS.md](./docs/REPOS.md)).
 
+## Пошаговая работа с пользователем
+
+**Один этап → выполнение → контроль → следующий.** Не выдавать длинные инструкции целиком. См. `.cursor/rules/incremental-steps.mdc`.
+
+## Product / UI bar
+
+Планка **OpenAI · Linear · Stripe**. Сомнение «эффектно vs премиально» → **премиально**. См. `.cursor/rules/premium-product-bar.mdc` (и зеркало в ai-playbook-generator).
+
 ## Workflow order (N11)
 
 1. **Capture** — desktop-instructor: `main.py` → `agent-verify -Strict` → `export_capture_pack.py --require-release`.
