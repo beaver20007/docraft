@@ -33,9 +33,8 @@ Optional: Magical PDF ──► Protect (scan-like PDF) · Utilities (merge, com
 | **2** | N11a API | `POST /generate/with-captures` + worker pipeline live on Railway |
 | **3** | N11b helper | Tray app: Capture → export → HTTP upload (no questionary) |
 | **4** | Protect hook | Docraft export → Magical deep link / CLI (v0.1 spec) |
-| **5** | PDF utilities | magical-pdf: merge/compress; Stirling as reference, not embed |
-| **6** | Extract sandbox | ocr-docs: layout DOCX/PPTX + job UI |
-| **7** | PDF hub merge | Extract → magical-pdf; single local app |
+| **5** | **Extract in magical-pdf** ⭐ | Port ocr-docs pipeline + Распознать tab (priority) |
+| **6** | PDF utilities | merge/compress; Stirling as reference |
 
 Details and DoD: [docs/INTEGRATION_PHASES.md](./docs/INTEGRATION_PHASES.md).
 

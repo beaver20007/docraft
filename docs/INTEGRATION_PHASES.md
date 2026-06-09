@@ -1,6 +1,8 @@
-# DOCRAFT — integration phases (0–4)
+# DOCRAFT — integration phases (0–6)
 
-Checklist for merging Create, Capture, and Protect. Do not run DNS cutover and large features in parallel (child roadmap rule).
+Checklist for merging Create, Capture, and PDF workstation. Do not run DNS cutover and large features in parallel (child roadmap rule).
+
+**Strategic pivot (2026-06):** Extract (ocr-docs) integrates **now** into magical-pdf UI — no separate sandbox product. See magical-pdf `docs/EXTRACT_INTEGRATION.md`.
 
 ---
 
@@ -55,53 +57,49 @@ See `desktop-instructor/docs/N11B_BACKLOG.md`.
 
 ---
 
-## Phase 4 — Protect hook (Magical PDF)
+## Phase 4 — Protect hook (Magical PDF) — largely done
 
 | # | Task | DoD |
 |---|------|-----|
 | 4.1 | Docraft PDF export CTA «Protect with Magical» | Opens Pages or Tauri with `?source=docraft` |
-| 4.2 | Implement v0.1 from `magical-pdf/docs/DOCRAFT_API_HOOK.md` | At least deep link documented in UI |
+| 4.2 | Implement v0.1 from `magical-pdf/docs/DOCRAFT_API_HOOK.md` | Deep link + `?mode=protect` in UI |
 | 4.3 | Optional `protect.docraft.pro` | Only if separate deploy justified |
 
+**Status:** Protect shipped in magical-pdf; 4.1–4.2 remain Docraft UI wiring.
+
 ---
 
-## Phase 5 — PDF utilities (magical-pdf, Stirling-class)
+## Phase 5 — Extract in magical-pdf ⭐ CURRENT PRIORITY
 
-**Goal:** Local merge/split/compress (and similar) inside magical-pdf — **not** a separate Stirling embed in Docraft Create.
+**Goal:** Scanned PDF → editable DOCX/PPTX **inside magical-pdf** (no terminal, no separate ocr-docs app).
 
 | # | Task | Owner | DoD |
 |---|------|-------|-----|
-| 5.1 | `PDF_UTILITIES_ROADMAP.md` agreed | magical-pdf | Priority list + native vs sidecar |
-| 5.2 | First tools (merge, compress) | magical-pdf | Web or Tauri; files stay local |
-| 5.3 | Docraft deep link `?mode=tools` | Create + magical-pdf | Documented in `DOCRAFT_API_HOOK.md` |
-| 5.4 | Stirling evaluation | optional | Dev-only Docker reference; no Extract via LibreOffice |
+| 5.1 | Port ocr-docs `pipeline/` + `api/` → `magical-pdf/extract/` | magical-pdf | `python -m` / uvicorn runs from subfolder |
+| 5.2 | Tab shell: **Защитить** \| **Распознать** + `?mode=` | magical-pdf | Refactor `app.js` → `src/protect.js` + router |
+| 5.3 | Extract tab: upload → job poll → download DOCX/PPTX | magical-pdf | Works on web dev against `:8765` |
+| 5.4 | Tauri: `ensure_extract_server` spawn sidecar | magical-pdf | Desktop starts API; no manual uvicorn |
+| 5.5 | Worker defaults: `layout` DOCX; PPTX if landscape | extract/ | Lukoil + Plan pass manual QA via UI |
+| 5.6 | Docraft CTA «Распознать» → `?mode=extract` | Create | Documented in `DOCRAFT_API_HOOK.md` |
+| 5.7 | Freeze ocr-docs repo; REPOS → single PDF hub | docraft | Pipeline changes only in magical-pdf |
 
-**DoD phase:** Author opens PDF from Docraft → magical-pdf tools → download result without cloud PDF upload.
+**DoD phase:** User opens magical-pdf → Распознать → uploads scan → downloads editable Office file locally.
 
----
+**Source:** `C:\Projects\ocr-docs` (read-only reference until 5.1 lands).
 
-## Phase 6 — Extract sandbox (ocr-docs)
-
-**Goal:** Scanned PDF → editable DOCX/PPTX with layout gate; UI for jobs (no terminal).
-
-| # | Task | Owner | DoD |
-|---|------|-------|-----|
-| 6.1 | Quality P0 on test-simple + Lukoil + Plan | ocr-docs | [QUALITY_CRITERIA](../ocr-docs/docs/QUALITY_CRITERIA.md) |
-| 6.2 | Web UI on FastAPI `:8765` | ocr-docs | Upload → progress → download |
-| 6.3 | `layout` mode default in worker | ocr-docs | Single compliant DOCX, not scan+текст pair |
-| 6.4 | Docraft CTA «Распознать» | Create | Deep link to Extract (`mode=extract` or local API) |
+Spec: [magical-pdf/docs/EXTRACT_INTEGRATION.md](https://github.com/beaver20007/magical-pdf/blob/main/docs/EXTRACT_INTEGRATION.md).
 
 ---
 
-## Phase 7 — Merge Extract into magical-pdf
+## Phase 6 — PDF utilities (deferred)
+
+**Goal:** merge/split/compress natively in magical-pdf (Stirling-class). **After** Extract MVP.
 
 | # | Task | DoD |
 |---|------|-----|
-| 7.1 | Port `DocumentIR` + pipeline into magical-pdf | One repo, tabs Protect \| Tools \| Extract |
-| 7.2 | Deprecate standalone ocr-docs distribution | REPOS.md: Extract row → magical-pdf only |
-| 7.3 | Unified `DOCRAFT_API_HOOK.md` modes | `protect`, `tools`, `extract` |
-
-**Gate:** Phase 6 quality + privacy sign-off before merge.
+| 6.1 | merge + compress (pdf-lib / sidecar) | Local, no cloud |
+| 6.2 | `?mode=tools` tab | Third tab in shell |
+| 6.3 | Stirling as dev reference only | No Java in product |
 
 ---
 
@@ -117,4 +115,9 @@ See `desktop-instructor/docs/N11B_BACKLOG.md`.
 
 ## Current focus
 
-**Phase 1.2–1.4** in ai-playbook-generator per [README](../README.md).
+| Track | Focus |
+|-------|--------|
+| **Create** | Phase 1.2–1.4 (capture pipeline) — continues in parallel |
+| **PDF hub** | **Phase 5** Extract in magical-pdf — **priority for PDF work** |
+
+Do not block Capture on Extract; teams/repos are independent until Docraft deep links (5.6).
