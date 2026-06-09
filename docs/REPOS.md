@@ -5,7 +5,8 @@
 | **Meta** | docraft | https://github.com/beaver20007/docraft | main | *(this repo)* | `C:\Projects\docraft` | Canonical N11 contract |
 | **Create** | ai-playbook-generator | https://github.com/beaver20007/ai-playbook-generator | main | `cded0af` | `C:\Users\tsvetkov\ai playbook generator` | Prod SaaS; N11a stub 501 |
 | **Capture** | desktop-instructor | https://github.com/beaver20007/desktop-instructor | master | `e6c7e47` | `C:\Projects\autocad-instructor` | Export ZIP + agent-verify |
-| **Protect** | magical-pdf | https://github.com/beaver20007/magical-pdf | main | `eed2874` | `C:\Users\tsvetkov\Documents\magical-pdf` | Docs + manual hook v0.1 |
+| **Protect + PDF hub** | magical-pdf | https://github.com/beaver20007/magical-pdf | main | `eed2874` | `C:\Users\tsvetkov\Documents\magical-pdf` | Protect shipped; Utilities + Extract UI planned ([PDF_UTILITIES_ROADMAP](https://github.com/beaver20007/magical-pdf/blob/main/docs/PDF_UTILITIES_ROADMAP.md)) |
+| **Extract (sandbox)** | ocr-docs | *(local sandbox)* | — | — | `C:\Projects\ocr-docs` | Pipeline sandbox → **merge into magical-pdf** phase 7; spec `ocr-docs/docs/ECOSYSTEM_ROADMAP.md` |
 
 Update **Pin** column when child repos release contract-relevant changes.
 
@@ -15,7 +16,8 @@ Update **Pin** column when child repos release contract-relevant changes.
 |------|------|
 | Create | `AGENTS.md` (if present), `docs/DOCRAFT_INTEGRATION.md`, `docs/ROADMAP-FINALE.md` |
 | Capture | `AGENTS.md`, `docs/DOCRAFT_INTEGRATION.md`, `docs/N11B_BACKLOG.md` |
-| Protect | `docs/DOCRAFT_INTEGRATION.md`, `CODEX_HANDOFF.md` |
+| Protect + PDF hub | `docs/DOCRAFT_INTEGRATION.md`, `docs/PDF_UTILITIES_ROADMAP.md`, `CODEX_HANDOFF.md` |
+| Extract (sandbox) | `AGENTS.md`, `docs/DOCRAFT_INTEGRATION.md`, `docs/ECOSYSTEM_ROADMAP.md`, `docs/API.md` |
 
 ## Production
 

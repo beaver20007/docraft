@@ -14,14 +14,15 @@ User query ──► Create (Docraft SaaS) ──► PDF/DOCX with text layer
                     │ Capture Pack ZIP (N11)
 Desktop Instructor ─┘
 
-Optional: Magical PDF (Protect) ──► scan-like PDF, offline, no text selection
+Optional: Magical PDF ──► Protect (scan-like PDF) · Utilities (merge, compress, …) · Extract (scan → DOCX)
 ```
 
 ## Child products
 
 1. **Create** — [ai-playbook-generator](https://github.com/beaver20007/ai-playbook-generator): Next.js + FastAPI + worker; Supabase auth; ReportLab render; GPT Image 2 for optional AI illustrations.
 2. **Capture** — [desktop-instructor](https://github.com/beaver20007/desktop-instructor): Windows Python; COM/pyautogui screenshots; QA gates; `export_capture_pack.py`.
-3. **Protect** — [magical-pdf](https://github.com/beaver20007/magical-pdf): browser/Tauri/iOS; PDF→JPEG→PDF locally.
+3. **PDF workstation** — [magical-pdf](https://github.com/beaver20007/magical-pdf): browser/Tauri/iOS; **Protect** today; **Utilities** (Stirling-class, planned); **Extract** (merge from ocr-docs sandbox, planned).
+4. **Extract sandbox** — ocr-docs (`C:\Projects\ocr-docs`): DocumentIR pipeline until phase 7 merge into magical-pdf.
 
 ## Integration phases
 
@@ -32,6 +33,9 @@ Optional: Magical PDF (Protect) ──► scan-like PDF, offline, no text select
 | **2** | N11a API | `POST /generate/with-captures` + worker pipeline live on Railway |
 | **3** | N11b helper | Tray app: Capture → export → HTTP upload (no questionary) |
 | **4** | Protect hook | Docraft export → Magical deep link / CLI (v0.1 spec) |
+| **5** | PDF utilities | magical-pdf: merge/compress; Stirling as reference, not embed |
+| **6** | Extract sandbox | ocr-docs: layout DOCX/PPTX + job UI |
+| **7** | PDF hub merge | Extract → magical-pdf; single local app |
 
 Details and DoD: [docs/INTEGRATION_PHASES.md](./docs/INTEGRATION_PHASES.md).
 
