@@ -3,10 +3,10 @@
 | Layer | Name | GitHub | Branch | Pin (main) | Local path (default) | Integration |
 |-------|------|--------|--------|------------|----------------------|-------------|
 | **Meta** | docraft | https://github.com/beaver20007/docraft | main | *(this repo)* | `C:\Projects\docraft` | Canonical N11 contract |
-| **Create** | ai-playbook-generator | https://github.com/beaver20007/ai-playbook-generator | main | `cded0af` | `C:\Users\tsvetkov\ai playbook generator` | Prod SaaS; N11a stub 501 |
+| **Create** | ai-playbook-generator | https://github.com/beaver20007/ai-playbook-generator | main | `f54cb36` | `C:\Users\tsvetkov\ai playbook generator` | Prod SaaS; CTA "Распознать PDF" → Extract |
 | **Capture** | desktop-instructor | https://github.com/beaver20007/desktop-instructor | master | `e6c7e47` | `C:\Projects\autocad-instructor` | Export ZIP + agent-verify |
-| **Protect + PDF hub** | magical-pdf | https://github.com/beaver20007/magical-pdf | main | `eed2874` | `C:\Users\tsvetkov\Documents\magical-pdf` | Protect shipped; Utilities + Extract UI planned ([PDF_UTILITIES_ROADMAP](https://github.com/beaver20007/magical-pdf/blob/main/docs/PDF_UTILITIES_ROADMAP.md)) |
-| **Extract (porting)** | ocr-docs → magical-pdf | *(local)* | — | — | `C:\Projects\ocr-docs` → `magical-pdf/extract/` | **Phase 5:** port pipeline + UI now; freeze ocr-docs after 5.7 |
+| **Protect + PDF hub** | magical-pdf | https://github.com/beaver20007/magical-pdf | main | `3b9b8e5` | `C:\Users\tsvetkov\Documents\magical-pdf` | Protect shipped; Extract pipeline live (`magical-pdf/extract/`) — Phase 5 done |
+| **Extract (archived)** | ocr-docs | *(local, frozen)* | master | `803f859` | `C:\Projects\ocr-docs` | ✅ Ported to magical-pdf/extract — Phase 5.7 frozen 2026-06-12 |
 
 Update **Pin** column when child repos release contract-relevant changes.
 
