@@ -1,0 +1,143 @@
+/* ============================================================
+   DOCRAFT.pro v2 — PDF Output Themes
+   Три темы для генерируемых документов
+   Подключается к ReportLab / PDF-renderer через CSS-vars
+   ============================================================ */
+
+/* ── Тема 1: DOCRAFT Light (рекомендованная) ────────────── */
+[data-pdf-theme="docraft-light"] {
+  --pdf-bg:           #F8F8FC;
+  --pdf-surface:      #FFFFFF;
+  --pdf-cover-bg:     #1A1A2E;
+  --pdf-cover-text:   #FFFFFF;
+  --pdf-cover-accent: #6B5CE7;
+  --pdf-cover-sub:    #00BFA5;
+
+  --pdf-h1:           #1A1A2E;
+  --pdf-h2:           #1A1A2E;
+  --pdf-h3:           #6B5CE7;
+  --pdf-body:         #2A2A3E;
+  --pdf-muted:        #888899;
+
+  --pdf-accent:       #6B5CE7;
+  --pdf-accent-2:     #00BFA5;
+  --pdf-accent-3:     #F5A623;
+
+  --pdf-border:       rgba(26,26,46,0.10);
+  --pdf-divider:      #E8E8F0;
+
+  --pdf-tag-bg:       #EEEDFE;
+  --pdf-tag-text:     #534AB7;
+
+  --pdf-kpi-bg:       #F3F2F9;
+  --pdf-kpi-border:   #CECBF6;
+  --pdf-kpi-value:    #1A1A2E;
+  --pdf-kpi-label:    #888899;
+
+  --pdf-callout-bg:   #EEEDfe;
+  --pdf-callout-border: #6B5CE7;
+  --pdf-callout-text: #3C3489;
+
+  --pdf-table-header-bg:   #1A1A2E;
+  --pdf-table-header-text: #FFFFFF;
+  --pdf-table-row-odd:     #F8F8FC;
+  --pdf-table-row-even:    #FFFFFF;
+
+  --pdf-footer-bg:    #1A1A2E;
+  --pdf-footer-text:  rgba(255,255,255,0.4);
+
+  --pdf-font-display: Epilogue, DM Sans, sans-serif;
+  --pdf-font-body:    DM Sans, Inter, sans-serif;
+}
+
+/* ── Тема 2: DOCRAFT Dark ───────────────────────────────── */
+[data-pdf-theme="docraft-dark"] {
+  --pdf-bg:           #10101E;
+  --pdf-surface:      #1A1A2E;
+  --pdf-cover-bg:     #0D0D1A;
+  --pdf-cover-text:   #FFFFFF;
+  --pdf-cover-accent: #6B5CE7;
+  --pdf-cover-sub:    #00BFA5;
+
+  --pdf-h1:           #EEEEF8;
+  --pdf-h2:           #CCCCEE;
+  --pdf-h3:           #6B5CE7;
+  --pdf-body:         #AAAACC;
+  --pdf-muted:        #666688;
+
+  --pdf-accent:       #6B5CE7;
+  --pdf-accent-2:     #00BFA5;
+  --pdf-accent-3:     #F5A623;
+
+  --pdf-border:       rgba(238,238,248,0.08);
+  --pdf-divider:      rgba(238,238,248,0.10);
+
+  --pdf-tag-bg:       rgba(107,92,231,0.2);
+  --pdf-tag-text:     #AFA9EC;
+
+  --pdf-kpi-bg:       #252543;
+  --pdf-kpi-border:   rgba(107,92,231,0.3);
+  --pdf-kpi-value:    #EEEEF8;
+  --pdf-kpi-label:    #666688;
+
+  --pdf-callout-bg:   rgba(107,92,231,0.12);
+  --pdf-callout-border: #6B5CE7;
+  --pdf-callout-text: #AFA9EC;
+
+  --pdf-table-header-bg:   #252543;
+  --pdf-table-header-text: #EEEEF8;
+  --pdf-table-row-odd:     #1A1A2E;
+  --pdf-table-row-even:    #141426;
+
+  --pdf-footer-bg:    #0D0D1A;
+  --pdf-footer-text:  rgba(255,255,255,0.3);
+
+  --pdf-font-display: Epilogue, DM Sans, sans-serif;
+  --pdf-font-body:    DM Sans, Inter, sans-serif;
+}
+
+/* ── Тема 3: DOCRAFT Violet ─────────────────────────────── */
+[data-pdf-theme="docraft-violet"] {
+  --pdf-bg:           #F0EDFF;
+  --pdf-surface:      #FFFFFF;
+  --pdf-cover-bg:     #6B5CE7;
+  --pdf-cover-text:   #FFFFFF;
+  --pdf-cover-accent: #FFFFFF;
+  --pdf-cover-sub:    #00BFA5;
+
+  --pdf-h1:           #1A1A2E;
+  --pdf-h2:           #3C3489;
+  --pdf-h3:           #6B5CE7;
+  --pdf-body:         #2A2A3E;
+  --pdf-muted:        #7777AA;
+
+  --pdf-accent:       #6B5CE7;
+  --pdf-accent-2:     #00BFA5;
+  --pdf-accent-3:     #F5A623;
+
+  --pdf-border:       rgba(107,92,231,0.15);
+  --pdf-divider:      #CECBF6;
+
+  --pdf-tag-bg:       rgba(107,92,231,0.12);
+  --pdf-tag-text:     #3C3489;
+
+  --pdf-kpi-bg:       #EEEDFE;
+  --pdf-kpi-border:   #AFA9EC;
+  --pdf-kpi-value:    #1A1A2E;
+  --pdf-kpi-label:    #7777AA;
+
+  --pdf-callout-bg:   #E4E0FD;
+  --pdf-callout-border: #6B5CE7;
+  --pdf-callout-text: #3C3489;
+
+  --pdf-table-header-bg:   #6B5CE7;
+  --pdf-table-header-text: #FFFFFF;
+  --pdf-table-row-odd:     #F0EDFF;
+  --pdf-table-row-even:    #FFFFFF;
+
+  --pdf-footer-bg:    #6B5CE7;
+  --pdf-footer-text:  rgba(255,255,255,0.6);
+
+  --pdf-font-display: Epilogue, DM Sans, sans-serif;
+  --pdf-font-body:    DM Sans, Inter, sans-serif;
+}

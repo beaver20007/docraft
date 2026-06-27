@@ -1,0 +1,117 @@
+/* ============================================================
+   DOCRAFT.pro — Design Tokens v2
+   Версия B для A/B-тестирования
+   Основа: логотип вариант #20
+   ============================================================ */
+
+:root {
+  /* ── Бренд-палитра ──────────────────────────────────────── */
+  --dc-dark:        #1A1A2E;  /* Основной тёмный */
+  --dc-dark-2:      #252543;  /* Тёмный поверхностный */
+  --dc-dark-3:      #2E2E52;  /* Тёмный бордер/hover */
+
+  --dc-violet:      #6B5CE7;  /* Основной акцент */
+  --dc-violet-2:    #534AB7;  /* Hover состояние */
+  --dc-violet-3:    #3C3489;  /* Active / pressed */
+  --dc-violet-50:   #EEEDFE;  /* Светлый фон акцента */
+  --dc-violet-100:  #CECBF6;  /* Бордер акцента */
+
+  --dc-cyan:        #00BFA5;  /* Вторичный акцент (AI-ready) */
+  --dc-cyan-2:      #0F6E56;  /* Hover циана */
+  --dc-cyan-50:     #E1F5EE;  /* Светлый фон цианового */
+
+  --dc-orange:      #F5A623;  /* Третичный акцент (CTA) */
+  --dc-orange-2:    #D08010;  /* Hover оранжевого */
+  --dc-orange-50:   #FFF8EE;  /* Светлый фон оранжевого */
+
+  /* ── Нейтралы ───────────────────────────────────────────── */
+  --dc-bg:          #F8F8FC;  /* Фон страницы */
+  --dc-surface:     #FFFFFF;  /* Фон карточек */
+  --dc-surface-2:   #F3F2F9;  /* Альтернативный фон */
+
+  --dc-text:        #1A1A2E;  /* Основной текст */
+  --dc-text-2:      #4A4A6A;  /* Вторичный текст */
+  --dc-text-3:      #888899;  /* Мутный / placeholder */
+  --dc-text-inv:    #FFFFFF;  /* Текст на тёмном */
+
+  --dc-border:      rgba(26,26,46,0.10);  /* Слабый бордер */
+  --dc-border-2:    rgba(26,26,46,0.18);  /* Средний бордер */
+  --dc-border-3:    rgba(26,26,46,0.30);  /* Сильный бордер */
+
+  /* ── Семантика ──────────────────────────────────────────── */
+  --dc-success:     #00BFA5;
+  --dc-warning:     #F5A623;
+  --dc-error:       #E24B4A;
+  --dc-info:        #6B5CE7;
+
+  /* ── Типографика ────────────────────────────────────────── */
+  --dc-font-display: 'Epilogue', 'Sora', system-ui, sans-serif;
+  --dc-font-body:    'DM Sans', 'Inter', system-ui, sans-serif;
+  --dc-font-mono:    'JetBrains Mono', 'Fira Code', monospace;
+
+  --dc-text-xs:   10px;
+  --dc-text-sm:   12px;
+  --dc-text-base: 14px;
+  --dc-text-md:   16px;
+  --dc-text-lg:   20px;
+  --dc-text-xl:   24px;
+  --dc-text-2xl:  30px;
+  --dc-text-3xl:  38px;
+
+  --dc-weight-normal: 400;
+  --dc-weight-medium: 500;
+  --dc-weight-semi:   600;
+  --dc-weight-bold:   700;
+  --dc-weight-black:  800;
+
+  --dc-leading-tight:  1.2;
+  --dc-leading-normal: 1.5;
+  --dc-leading-loose:  1.7;
+
+  /* ── Spacing ────────────────────────────────────────────── */
+  --dc-space-1:  4px;
+  --dc-space-2:  8px;
+  --dc-space-3:  12px;
+  --dc-space-4:  16px;
+  --dc-space-5:  20px;
+  --dc-space-6:  24px;
+  --dc-space-8:  32px;
+  --dc-space-10: 40px;
+  --dc-space-12: 48px;
+  --dc-space-16: 64px;
+
+  /* ── Радиусы ────────────────────────────────────────────── */
+  --dc-radius-sm:   4px;
+  --dc-radius-md:   8px;
+  --dc-radius-lg:   12px;
+  --dc-radius-xl:   16px;
+  --dc-radius-full: 9999px;
+
+  /* ── Тени (плоский стиль — только для focus-ring) ───────── */
+  --dc-ring-violet: 0 0 0 3px rgba(107,92,231,0.25);
+  --dc-ring-cyan:   0 0 0 3px rgba(0,191,165,0.25);
+
+  /* ── Transitions ────────────────────────────────────────── */
+  --dc-transition: 150ms ease;
+  --dc-transition-slow: 250ms ease;
+
+  /* ── Navbar ─────────────────────────────────────────────── */
+  --dc-nav-bg:     var(--dc-dark);
+  --dc-nav-height: 52px;
+
+  /* ── Hero ───────────────────────────────────────────────── */
+  --dc-hero-bg:    var(--dc-dark);
+}
+
+/* ── Тёмная тема (для секций / компонентов) ─────────────── */
+[data-theme="dark"] {
+  --dc-bg:       #10101E;
+  --dc-surface:  #1A1A2E;
+  --dc-surface-2:#252543;
+  --dc-text:     #EEEEF8;
+  --dc-text-2:   #AAAACC;
+  --dc-text-3:   #666688;
+  --dc-border:   rgba(238,238,248,0.08);
+  --dc-border-2: rgba(238,238,248,0.14);
+  --dc-border-3: rgba(238,238,248,0.22);
+}

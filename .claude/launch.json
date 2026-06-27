@@ -1,0 +1,19 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "magical-pdf-web",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "apps/magical-pdf"],
+      "port": 5173,
+      "autoPort": true
+    },
+    {
+      "name": "ai-playbook-web",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["next", "dev"],
+      "cwd": "apps/ai-playbook/apps/web",
+      "port": 3000
+    }
+  ]
+}

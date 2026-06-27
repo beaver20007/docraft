@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DOCRAFT.pro — AI Playbook Generator</title>
+  <meta name="description" content="Создавайте профессиональные PDF-документы с помощью AI" />
+
+  <!-- Шрифты -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;700;800&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- Иконки -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+
+  <!-- Стили DOCRAFT v2 -->
+  <link rel="stylesheet" href="../tokens/design-tokens.css" />
+  <link rel="stylesheet" href="../components/components.css" />
+
+  <style>
+    /* Специфика страницы — не в компонентах */
+    .page-main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 28px 32px 64px;
+    }
+
+    .templates-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .params-grid    { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .themes-grid    { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+
+    .param-label {
+      font-size: 11px;
+      color: var(--dc-text-3);
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .topic-wrap { position: relative; }
+    .char-count {
+      position: absolute;
+      bottom: 8px;
+      right: 12px;
+      font-size: 10px;
+      color: var(--dc-text-3);
+    }
+
+    .footer-note {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 12px;
+      font-size: 10px;
+      color: var(--dc-text-3);
+    }
+    .footer-note__sep { opacity: 0.4; }
+
+    @media (max-width: 640px) {
+      .page-main       { padding: 20px 16px 48px; }
+      .templates-grid  { grid-template-columns: 1fr 1fr; }
+      .themes-grid     { grid-template-columns: 1fr 1fr; }
+      .params-grid     { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAVBAR ─────────────────────────────────────────── -->
+<nav class="dc-navbar">
+  <a href="/" class="dc-navbar__logo">
+    <!-- Logo mark (inverse for dark navbar) -->
+    <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M5 26 L5 6 L18 6 Q26 6 26 16 Q26 26 18 26 Z"
+            fill="none" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+      <path d="M10 10 L18 10 Q22 10 22 16 Q22 22 18 22 L10 22 Z"
+            fill="#6B5CE7" opacity="0.25"/>
+      <line x1="12" y1="13" x2="20" y2="13" stroke="#6B5CE7" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="12" y1="16" x2="21" y2="16" stroke="#6B5CE7" stroke-width="1.5" stroke-linecap="round" opacity="0.8"/>
+      <line x1="12" y1="19" x2="20" y2="19" stroke="#6B5CE7" stroke-width="1.5" stroke-linecap="round" opacity="0.55"/>
+      <circle cx="26" cy="26" r="5" fill="#00BFA5"/>
+      <path d="M23.5 26 L25.5 28 L29 24.5"
+            stroke="white" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div>
+      <div class="dc-navbar__brand">
+        DOCRAFT<span class="dc-navbar__brand--accent">.pro</span>
+      </div>
+      <div class="dc-navbar__tagline">AI-POWERED DOCUMENTS</div>
+    </div>
+  </a>
+
+  <div class="dc-navbar__actions">
+    <a href="/auth" class="dc-btn dc-btn--nav">Войти</a>
+    <a href="/admin" class="dc-btn dc-btn--violet" style="font-size:11px; padding:7px 14px;">
+      Admin →
+    </a>
+  </div>
+</nav>
+
+<!-- ── HERO ───────────────────────────────────────────── -->
+<section class="dc-hero">
+  <div style="max-width:720px; margin:0 auto;">
+    <div class="dc-badge dc-badge--violet dc-badge--dot" style="margin-bottom:16px;">
+      PLAYBOOK GENERATOR · GPT-4o + Claude
+    </div>
+    <h1 class="dc-hero__title">
+      Создайте профессиональный<br>
+      <span class="dc-hero__title--accent">документ за секунды</span>
+    </h1>
+    <p class="dc-hero__sub">
+      Опишите тему — AI сгенерирует структурированный PDF с иллюстрациями,
+      KPI-блоками и готовыми разделами
+    </p>
+  </div>
+</section>
+
+<!-- ── MAIN FORM ──────────────────────────────────────── -->
+<main class="page-main">
+
+  <!-- Прогресс-бар (визуальный, не функциональный в MVP) -->
+  <div class="dc-progress">
+    <div class="dc-progress__bar" style="width:35%" id="js-progress"></div>
+  </div>
+
+  <!-- 1. Тема документа -->
+  <p class="dc-section-label">Тема документа</p>
+  <div class="dc-card" style="margin-bottom:16px;">
+    <div class="topic-wrap">
+      <textarea
+        class="dc-textarea"
+        id="js-topic"
+        placeholder="Например: Онбординг нового разработчика в команду бэкенда…"
+        maxlength="500"
+        rows="3"
+      >Найм отдела продаж — роли, воронка, скрипты, KPI</textarea>
+      <span class="char-count" id="js-char">47 / 500</span>
+    </div>
+
+    <!-- Примеры-чипы -->
+    <div class="dc-grid-auto" style="margin-top:10px;" id="js-examples">
+      <span class="dc-chip">Удалённая разработка</span>
+      <span class="dc-chip">Customer Success</span>
+      <span class="dc-chip">OKR для команды</span>
+      <span class="dc-chip">Стратегия выхода на рынок</span>
+      <span class="dc-chip">Процесс код-ревью</span>
+    </div>
+  </div>
+
+  <!-- 2. Шаблон -->
+  <p class="dc-section-label">Шаблон документа</p>
+  <div class="dc-card" style="margin-bottom:16px; padding:16px;">
+    <div class="templates-grid" id="js-templates">
+
+      <div class="dc-tpl is-active" data-tpl="playbook">
+        <i class="ti ti-book dc-tpl__icon" style="color:#6B5CE7;" aria-hidden="true"></i>
+        <div class="dc-tpl__name">Playbook</div>
+        <div class="dc-tpl__desc">Операционные руководства: роли, процессы, KPI</div>
+        <span class="dc-tpl__badge">Популярный</span>
+      </div>
+
+      <div class="dc-tpl" data-tpl="onboarding">
+        <i class="ti ti-user-check dc-tpl__icon" style="color:#00BFA5;" aria-hidden="true"></i>
+        <div class="dc-tpl__name">Onboarding</div>
+        <div class="dc-tpl__desc">Чеклисты и шаги для новых сотрудников</div>
+      </div>
+
+      <div class="dc-tpl" data-tpl="memo">
+        <i class="ti ti-file-text dc-tpl__icon" style="color:#F5A623;" aria-hidden="true"></i>
+        <div class="dc-tpl__name">Memo</div>
+        <div class="dc-tpl__desc">Краткий внутренний документ для команды</div>
+      </div>
+
+      <div class="dc-tpl" data-tpl="strategy">
+        <i class="ti ti-presentation dc-tpl__icon" style="color:#6B5CE7;" aria-hidden="true"></i>
+        <div class="dc-tpl__name">Strategy</div>
+        <div class="dc-tpl__desc">Стратегия, цели, план на квартал / год</div>
+      </div>
+
+      <div class="dc-tpl" data-tpl="sop">
+        <i class="ti ti-checklist dc-tpl__icon" style="color:#00BFA5;" aria-hidden="true"></i>
+        <div class="dc-tpl__name">SOP</div>
+        <div class="dc-tpl__desc">Стандартная операционная процедура</div>
+      </div>
+
+      <div class="dc-tpl" data-tpl="report">
+        <i class="ti ti-chart-bar dc-tpl__icon" style="color:#F5A623;" aria-hidden="true"></i>
+        <div class="dc-tpl__name">Report</div>
+        <div class="dc-tpl__desc">Аналитический отчёт с метриками</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 3. Параметры -->
+  <p class="dc-section-label">Параметры</p>
+  <div class="dc-card" style="margin-bottom:16px;">
+    <div class="params-grid">
+
+      <div>
+        <span class="param-label">Язык документа</span>
+        <div class="dc-seg" data-seg="language">
+          <button class="dc-seg__btn" data-val="auto">Авто</button>
+          <button class="dc-seg__btn is-active" data-val="ru">Русский</button>
+          <button class="dc-seg__btn" data-val="en">English</button>
+        </div>
+      </div>
+
+      <div>
+        <span class="param-label">Тон</span>
+        <div class="dc-seg" data-seg="tone">
+          <button class="dc-seg__btn is-active" data-val="practical">Практичный</button>
+          <button class="dc-seg__btn" data-val="formal">Формальный</button>
+          <button class="dc-seg__btn" data-val="friendly">Дружелюбный</button>
+        </div>
+      </div>
+
+      <div>
+        <span class="param-label">Аудитория</span>
+        <div class="dc-seg" data-seg="audience">
+          <button class="dc-seg__btn" data-val="wide">Широкая</button>
+          <button class="dc-seg__btn" data-val="novice">Новички</button>
+          <button class="dc-seg__btn is-active" data-val="pros">Практики</button>
+          <button class="dc-seg__btn" data-val="expert">Эксперты</button>
+        </div>
+      </div>
+
+      <div>
+        <span class="param-label">Объём</span>
+        <div class="dc-seg" data-seg="length">
+          <button class="dc-seg__btn" data-val="short">Кратко</button>
+          <button class="dc-seg__btn is-active" data-val="standard">Стандарт</button>
+          <button class="dc-seg__btn" data-val="detailed">Подробно</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="dc-hint" id="js-hint">
+      Цель: 3–4 модуля · ~6–10 стр. · Практики + Стандарт
+    </div>
+  </div>
+
+  <!-- 4. Тема оформления -->
+  <p class="dc-section-label">Тема оформления PDF</p>
+  <div class="dc-card" style="margin-bottom:16px; padding:16px;">
+    <div class="themes-grid" id="js-themes">
+
+      <div class="dc-theme is-active" data-theme-id="docraft-light">
+        <div class="dc-theme__preview dc-theme__preview--light">
+          <svg width="60" height="34" viewBox="0 0 60 34" aria-hidden="true">
+            <rect width="60" height="34" fill="#F8F8FC" rx="3"/>
+            <rect x="4" y="4" width="52" height="6" rx="2" fill="#1A1A2E"/>
+            <rect x="4" y="14" width="34" height="3" rx="1" fill="#DDDDE8"/>
+            <rect x="4" y="20" width="28" height="3" rx="1" fill="#DDDDE8"/>
+            <circle cx="52" cy="26" r="4" fill="#6B5CE7"/>
+            <path d="M50 26 L51.5 27.5 L54.5 24.5" stroke="white" stroke-width="0.8" fill="none"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="dc-theme__check" aria-hidden="true">✓</div>
+        <div class="dc-theme__name">DOCRAFT Light</div>
+        <div class="dc-theme__desc">Светлый фирменный · #F8F8FC</div>
+      </div>
+
+      <div class="dc-theme" data-theme-id="docraft-dark">
+        <div class="dc-theme__preview dc-theme__preview--dark">
+          <svg width="60" height="34" viewBox="0 0 60 34" aria-hidden="true">
+            <rect width="60" height="34" fill="#1A1A2E" rx="3"/>
+            <rect x="4" y="4" width="52" height="6" rx="2" fill="#6B5CE7"/>
+            <rect x="4" y="14" width="34" height="3" rx="1" fill="#333355"/>
+            <rect x="4" y="20" width="28" height="3" rx="1" fill="#333355"/>
+            <circle cx="52" cy="26" r="4" fill="#00BFA5"/>
+            <path d="M50 26 L51.5 27.5 L54.5 24.5" stroke="white" stroke-width="0.8" fill="none"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="dc-theme__check" aria-hidden="true">✓</div>
+        <div class="dc-theme__name">DOCRAFT Dark</div>
+        <div class="dc-theme__desc">Тёмный премиальный · #1A1A2E</div>
+      </div>
+
+      <div class="dc-theme" data-theme-id="docraft-violet">
+        <div class="dc-theme__preview dc-theme__preview--violet">
+          <svg width="60" height="34" viewBox="0 0 60 34" aria-hidden="true">
+            <rect width="60" height="34" fill="#F0EDFF" rx="3"/>
+            <rect x="4" y="4" width="52" height="6" rx="2" fill="#6B5CE7"/>
+            <rect x="4" y="14" width="34" height="3" rx="1" fill="#C8C2F8"/>
+            <rect x="4" y="20" width="28" height="3" rx="1" fill="#C8C2F8"/>
+            <circle cx="52" cy="26" r="4" fill="#F5A623"/>
+            <path d="M50 26 L51.5 27.5 L54.5 24.5" stroke="white" stroke-width="0.8" fill="none"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="dc-theme__check" aria-hidden="true">✓</div>
+        <div class="dc-theme__name">DOCRAFT Violet</div>
+        <div class="dc-theme__desc">Акцент на бренд · #6B5CE7</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 5. Контекст -->
+  <p class="dc-section-label">Контекст и AI-иллюстрации</p>
+  <div class="dc-card" style="margin-bottom:16px; display:flex; flex-direction:column; gap:10px;">
+
+    <div class="dc-upload" id="js-upload-zone">
+      <div class="dc-upload__icon">
+        <i class="ti ti-upload" aria-hidden="true"></i>
+      </div>
+      <div class="dc-upload__text">
+        <strong>Перетащи файл</strong> или нажми для выбора
+      </div>
+      <div class="dc-upload__text" style="margin-top:2px;">
+        PDF, Word, Excel · до 50 МБ
+      </div>
+      <input type="file" id="js-file-input" style="display:none;"
+             accept=".pdf,.doc,.docx,.xls,.xlsx,.txt" />
+    </div>
+
+    <div class="dc-ai-row">
+      <div class="dc-ai-row__left">
+        <div class="dc-ai-row__icon">
+          <i class="ti ti-sparkles" style="font-size:14px; color:white;" aria-hidden="true"></i>
+        </div>
+        <div>
+          <div class="dc-ai-row__title">AI-иллюстрации</div>
+          <div class="dc-ai-row__sub">GPT Image 2 · текст на инфографиках · проверка промптов</div>
+        </div>
+      </div>
+      <label class="dc-toggle">
+        <input type="checkbox" id="js-ai-toggle" checked />
+        <span class="dc-toggle__track"></span>
+      </label>
+    </div>
+
+  </div>
+
+  <!-- CTA -->
+  <button class="dc-btn dc-btn--primary dc-btn--lg" id="js-generate">
+    <svg width="20" height="20" viewBox="0 0 32 32" style="flex-shrink:0;" aria-hidden="true">
+      <path d="M5 26 L5 6 L18 6 Q26 6 26 16 Q26 26 18 26 Z"
+            fill="none" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+      <line x1="10" y1="12" x2="20" y2="12" stroke="#6B5CE7" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="10" y1="16" x2="21" y2="16" stroke="#6B5CE7" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+      <line x1="10" y1="20" x2="20" y2="20" stroke="#6B5CE7" stroke-width="1.5" stroke-linecap="round" opacity="0.45"/>
+      <circle cx="26" cy="26" r="5" fill="#00BFA5"/>
+      <path d="M23.5 26 L25.5 28 L29 24.5"
+            stroke="white" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    Сгенерировать документ
+  </button>
+
+  <div class="footer-note">
+    <span>Среднее время: 12–18 сек</span>
+    <span class="footer-note__sep">·</span>
+    <span>PDF + превью онлайн</span>
+    <span class="footer-note__sep">·</span>
+    <span>Доступен сразу после генерации</span>
+  </div>
+
+</main>
+
+<script>
+/* ── Тема документа: счётчик символов ─────────────────── */
+const topicTA = document.getElementById('js-topic');
+const charEl  = document.getElementById('js-char');
+topicTA.addEventListener('input', () => {
+  charEl.textContent = topicTA.value.length + ' / 500';
+});
+
+/* ── Чипы-примеры ──────────────────────────────────────── */
+document.querySelectorAll('#js-examples .dc-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    topicTA.value = chip.textContent.trim();
+    charEl.textContent = topicTA.value.length + ' / 500';
+    topicTA.focus();
+  });
+});
+
+/* ── Выбор шаблона ─────────────────────────────────────── */
+document.querySelectorAll('#js-templates .dc-tpl').forEach(card => {
+  card.addEventListener('click', () => {
+    document.querySelectorAll('#js-templates .dc-tpl').forEach(c => c.classList.remove('is-active'));
+    card.classList.add('is-active');
+  });
+});
+
+/* ── Сегментированные контроли ─────────────────────────── */
+document.querySelectorAll('.dc-seg').forEach(seg => {
+  seg.querySelectorAll('.dc-seg__btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      seg.querySelectorAll('.dc-seg__btn').forEach(b => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      updateHint();
+    });
+  });
+});
+
+/* Обновление подсказки под параметрами */
+function updateHint() {
+  const aud = document.querySelector('[data-seg="audience"] .is-active')?.dataset.val;
+  const len = document.querySelector('[data-seg="length"] .is-active')?.dataset.val;
+  const map = {
+    wide: 'Широкая аудитория', novice: 'Новички',
+    pros: 'Практики', expert: 'Эксперты'
+  };
+  const lenMap = {
+    short: '2–3 модуля · ~3–5 стр.',
+    standard: '3–4 модуля · ~6–10 стр.',
+    detailed: '5–7 модулей · ~12–18 стр.'
+  };
+  const hint = document.getElementById('js-hint');
+  hint.textContent = (lenMap[len] || '') + ' · ' + (map[aud] || '');
+}
+
+/* ── Выбор темы оформления ─────────────────────────────── */
+document.querySelectorAll('#js-themes .dc-theme').forEach(card => {
+  card.addEventListener('click', () => {
+    document.querySelectorAll('#js-themes .dc-theme').forEach(c => c.classList.remove('is-active'));
+    card.classList.add('is-active');
+  });
+});
+
+/* ── Загрузка файла ────────────────────────────────────── */
+const uploadZone = document.getElementById('js-upload-zone');
+const fileInput  = document.getElementById('js-file-input');
+
+uploadZone.addEventListener('click', () => fileInput.click());
+uploadZone.addEventListener('dragover', e => {
+  e.preventDefault();
+  uploadZone.style.borderColor = 'var(--dc-violet)';
+  uploadZone.style.background  = 'var(--dc-violet-50)';
+});
+uploadZone.addEventListener('dragleave', () => {
+  uploadZone.style.borderColor = '';
+  uploadZone.style.background  = '';
+});
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.style.borderColor = '';
+  uploadZone.style.background  = '';
+  const file = e.dataTransfer.files[0];
+  if (file) showFileInfo(file);
+});
+fileInput.addEventListener('change', () => {
+  if (fileInput.files[0]) showFileInfo(fileInput.files[0]);
+});
+
+function showFileInfo(file) {
+  const sizeKB = Math.round(file.size / 1024);
+  uploadZone.innerHTML = `
+    <div style="font-size:18px; color:var(--dc-cyan);">
+      <i class="ti ti-file-check"></i>
+    </div>
+    <div class="dc-upload__text">
+      <strong style="color:var(--dc-cyan);">${file.name}</strong>
+    </div>
+    <div class="dc-upload__text" style="margin-top:2px;">${sizeKB} КБ · Нажми чтобы заменить</div>
+  `;
+}
+
+/* ── Кнопка генерации ──────────────────────────────────── */
+document.getElementById('js-generate').addEventListener('click', function() {
+  const topic = topicTA.value.trim();
+  if (!topic) {
+    topicTA.style.borderColor = 'var(--dc-error)';
+    topicTA.focus();
+    setTimeout(() => { topicTA.style.borderColor = ''; }, 2000);
+    return;
+  }
+
+  const tpl      = document.querySelector('#js-templates .dc-tpl.is-active')?.dataset.tpl || 'playbook';
+  const lang     = document.querySelector('[data-seg="language"] .is-active')?.dataset.val || 'ru';
+  const tone     = document.querySelector('[data-seg="tone"] .is-active')?.dataset.val || 'practical';
+  const audience = document.querySelector('[data-seg="audience"] .is-active')?.dataset.val || 'pros';
+  const length   = document.querySelector('[data-seg="length"] .is-active')?.dataset.val || 'standard';
+  const theme    = document.querySelector('#js-themes .dc-theme.is-active')?.dataset.themeId || 'docraft-light';
+  const aiIllus  = document.getElementById('js-ai-toggle').checked;
+
+  /* Анимация прогресса */
+  const progressBar = document.getElementById('js-progress');
+  progressBar.style.width = '60%';
+  this.disabled = true;
+  this.innerHTML = `
+    <svg width="18" height="18" viewBox="0 0 18 18" style="animation:spin 1s linear infinite;">
+      <circle cx="9" cy="9" r="7" fill="none" stroke="white" stroke-width="2" stroke-dasharray="22 44"/>
+    </svg>
+    Генерирую документ…
+  `;
+
+  const style = document.createElement('style');
+  style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+  document.head.appendChild(style);
+
+  /* Сброс через 3 сек (демо) */
+  setTimeout(() => {
+    progressBar.style.width = '100%';
+    this.innerHTML = '✓ Документ готов — скачать PDF';
+    this.style.background = 'var(--dc-cyan)';
+    this.disabled = false;
+  }, 3000);
+
+  /* Передача параметров в реальный обработчик */
+  console.log('[DOCRAFT v2] Generate:', { topic, tpl, lang, tone, audience, length, theme, aiIllus });
+  /* window.generateDocument({ topic, tpl, lang, tone, audience, length, theme, aiIllus }); */
+});
+</script>
+
+</body>
+</html>
