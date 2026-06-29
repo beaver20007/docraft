@@ -5,3 +5,7 @@
 [submodule "apps/magical-pdf"]
 	path = apps/magical-pdf
 	url = https://github.com/beaver20007/magical-pdf.git
+
+[submodule "apps/desktop-instructor"]
+	path = apps/desktop-instructor
+	url = https://github.com/beaver20007/desktop-instructor.git
