@@ -6,11 +6,14 @@ on:
     paths:
       - "apps/ai-playbook/**"
       - ".github/workflows/ai-playbook-ci.yml"
+      - ".gitmodules"
   pull_request:
     branches: [main]
     paths:
       - "apps/ai-playbook/**"
       - ".github/workflows/ai-playbook-ci.yml"
+      - ".gitmodules"
+  workflow_dispatch:
 
 jobs:
   test:
