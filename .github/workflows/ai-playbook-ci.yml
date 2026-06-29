@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: apps/ai-playbook/apps/api
+        working-directory: apps/api
 
     env:
       REDIS_URL: redis://localhost:6379
@@ -41,15 +41,20 @@ jobs:
           --health-retries 5
 
     steps:
+      # Checkout the ai-playbook-generator repo directly (not as submodule)
+      # so we don't need cross-repo access from the docraft GITHUB_TOKEN.
+      # GH_PAT secret must be set on the docraft repo if ai-playbook-generator is private.
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          repository: beaver20007/ai-playbook-generator
+          token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          path: .
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: pip
-          cache-dependency-path: apps/ai-playbook/apps/api/pyproject.toml
+          cache-dependency-path: apps/api/pyproject.toml
 
       - name: Install dependencies
         run: pip install -e ".[dev]"
@@ -66,7 +71,7 @@ jobs:
         if: always()
         uses: codecov/codecov-action@v4
         with:
-          files: apps/ai-playbook/apps/api/coverage.xml
+          files: apps/api/coverage.xml
           flags: api
           fail_ci_if_error: false
         env:
