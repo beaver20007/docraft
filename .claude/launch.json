@@ -13,7 +13,16 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["next", "dev"],
       "cwd": "apps/ai-playbook/apps/web",
-      "port": 3000
+      "port": 3000,
+      "autoPort": true
+    },
+    {
+      "name": "ai-playbook-api",
+      "runtimeExecutable": "C:\\Users\\tsvetkov\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "runtimeArgs": ["-m", "uvicorn", "app.main:app", "--port", "8000"],
+      "cwd": "apps/ai-playbook/apps/api",
+      "port": 8000,
+      "autoPort": true
     }
   ]
 }
