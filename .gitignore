@@ -25,3 +25,8 @@ venv/
 *.log
 tmp/
 temp/
+
+# Claude Code project config — keep only skills tracked, everything else
+# (settings.local.json, worktrees/, caches) is local/session state
+.claude/*
+!.claude/skills/
