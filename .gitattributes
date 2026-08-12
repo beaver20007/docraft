@@ -1,0 +1,22 @@
+# Skill files installed via `npx skills add` (skills-lock.json) must keep
+# the exact bytes they were hashed with. The installer's computedHash
+# (bootstrap/Verify-SkillsLock.ps1 in project-method reproduces it) is a
+# SHA-256 over the raw on-disk bytes of every file under a skill's
+# .claude/skills/<name>/ directory, taken at install time. Without this
+# rule, core.autocrlf=true on Windows silently converts these files to
+# CRLF on checkout/clone (or LF->CRLF on `git add --renormalize`), which
+# changes those bytes and makes computedHash unreproducible even though
+# the skill's actual content never changed - confirmed 2026-08-06 by
+# reading the installer's real hashing code (no such normalization
+# happens there; the hash is over whatever bytes were on disk when it
+# ran). Pinning these paths to LF makes the hash reproducible again on
+# any machine, regardless of that machine's core.autocrlf setting.
+#
+# Note for this repo specifically: gsap-framer-scroll-animation's
+# computedHash only reproduces after LF-normalizing every file first (its
+# on-disk copy is already CRLF) - this rule is what stops that class of
+# drift from getting worse, though it does not retroactively fix files
+# already checked out as CRLF (that needs an explicit, separate
+# `git add --renormalize`, deliberately NOT done here - out of scope,
+# touches already-installed skill files).
+.claude/skills/**/*.md text eol=lf
