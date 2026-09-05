@@ -153,6 +153,61 @@ BILLING_ENFORCE=true
 
 ---
 
+## Дополнение 2026-09-05: проверка безопасности включения + смена модели доступа
+
+### У Оркестратора появился прямой read-доступ к прод-БД
+
+В этой сессии впервые стал доступен MCP-инструмент Supabase (`execute_sql`,
+`list_tables`, и т.д.), которого не было при диагностике H22/H23 выше (там explicit
+написано «доступа к прод-БД нет»). **Проверено перед использованием:** `list_projects`
+вернул ровно один проект, `id=hheqekekzthcgnecwvsh` — тот же самый project ref, что
+зашит в `SUPABASE_URL` (`https://hheqekekzthcgnecwvsh.supabase.co`) на обоих
+Railway-сервисах. Это не другая/тестовая база — тот же прод. Использован **только
+для `SELECT`**, ничего не менял и не мигрировал.
+
+### Факт по вопросу владельца — сколько `completed` exports у каждого пользователя в этом месяце
+
+```sql
+select user_id, count(*) filter (where status='completed') as completed_this_month
+from exports where created_at >= date_trunc('month', now()) group by user_id;
+-- → пусто, ни одной строки
+```
+
+```sql
+select count(*) exports_all_time, count(*) filter (where status='completed') exports_completed,
+       count(distinct user_id) distinct_users, max(created_at) latest
+from exports;
+-- → 34 всего, 34 completed, 2 разных пользователя, последняя запись 2026-07-23 22:20 UTC
+```
+
+```sql
+select count(*) from auth.users;              -- → 3 (совпадает с «текущими 3 пользователями» из вопроса)
+select count(*) from user_profiles;           -- → 0 (таблица создана H22, ещё не заполнена)
+select count(*), count(distinct user_id) from documents;  -- → 36 документов, 2 пользователя, последний тоже 2026-07-23
+```
+
+**Вывод: включение `BILLING_ENFORCE=true` сегодня никого задним числом не заблокирует.**
+Счётчик считает по календарному месяцу (`created_at >= date_trunc('month', now())`),
+а последняя реальная активность на проде — **2026-07-23**, больше месяца назад; в
+сентябре не было сгенерировано ни одного документа ни одним из 3 пользователей.
+`exports_used` для всех при включении флага в моменте — `0`. Третий из трёх
+`auth.users` не имеет вообще ни одного документа/экспорта.
+
+Отдельно: `user_profiles` пуст (0 строк) → `fetch_user_plan` для всех троих провалится
+в `_default_plan_for_user` → план `free` (если `billing_default_plan`/`billing_pro_user_ids`
+не переопределены — они тоже не заданы в Railway). Это ожидаемо на pre-Stripe (H1 не
+включён) и не создаёт риска в моменте.
+
+### Вопрос 1 (`FREE_MONTHLY_EXPORTS`)
+
+Дефолт в коде — `config.py:66`: **`free_monthly_exports: int = 3`**. На Railway
+(`ai-playbook-generator (api)`) переменная **не задана** (проверено `railway variables`,
+фильтр по `BILLING|EXPORTS` не дал совпадений) — значит при включении `BILLING_ENFORCE`
+без явной установки лимит будет **3 экспорта/месяц на Free**, взято из дефолта кода,
+не из окружения.
+
+---
+
 ## Урок протокола (записан честно, включая свою ошибку)
 
 Диагностика с тремя обязательными пунктами, один из которых требует недоступного
