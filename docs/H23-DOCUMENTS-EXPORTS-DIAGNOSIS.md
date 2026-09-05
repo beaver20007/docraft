@@ -1,205 +1,166 @@
-# H23 — диагностика: `documents`/`exports` не в проде
+# H23 — диагностика: почему квота Free не работает (исправленная версия)
 
-**Дата:** 2026-09-05 (сессия-5)
-**Статус:** ⏳ **диагностика завершена, применение — за владельцем.** Ничего к прод-БД
-не применял (см. H22 — доступа нет, и это правило, а не техническое ограничение).
+**Дата первой версии:** 2026-09-05 (сессия-5)
+**Дата исправления:** 2026-09-05 (та же сессия, следующий бриф)
+**Статус:** ✅ **корень найден фактом. Ничего к прод-БД/коду не применял.**
 
 ---
 
-## Приёмка-фактом
+## ⚠️ Предыдущая версия этого документа была неверна — коротко, что случилось
 
-### 1. Точные места в коде
+Первая версия утверждала: «`documents`/`exports` не существуют в прод-БД, готового
+`CREATE TABLE` нет как отдельной миграции». Владелец проверил прод-БД напрямую и
+опроверг это: **обе таблицы существуют, с полным набором ожидаемых колонок.**
 
-**Чтение (квота Free):**
-```
-apps/api/app/services/billing_service.py:124
-    f"{_rest_base()}/exports"   -- PostgREST-запрос к таблице "exports"
-    params: user_id=eq.<uuid>, status=eq.completed, created_at=gte.<месяц>, select=id
-```
+Ошибка была методологической: пункт 1c диагностики («проверить прод-БД через
+`information_schema.tables`») требовал доступа, которого у Оркестратора нет (см. H22).
+Вместо того чтобы остановиться на этом факте и явно попросить владельца проверить,
+предыдущая версия **сделала вывод по остальным двум пунктам** («кода миграции нет
+в `migrations/`, но есть в `schema.sql`») и представила его как ответ на весь вопрос —
+хотя решающий пункт (c) остался непроверенным. Это ровно то, от чего предостерегает
+правило 3 («отчёт без вывода команд — не факт»): отсутствие проверки не equals
+отрицательный результат проверки.
 
-**Запись (в момент завершения генерации):**
-```
-apps/api/app/services/supabase_service.py:37    POST {rest_base}/documents  (save_document)
-apps/api/app/services/supabase_service.py:76    POST {rest_base}/exports    (save_export)
-apps/api/app/services/supabase_service.py:107   GET  {rest_base}/exports    (get_user_exports, не вызывается ни из одного роута — мёртвый путь на сегодня)
-```
+**Урок зафиксирован отдельно ниже, в конце документа.**
 
-**Вызывается из воркера** (не мёртвый код — это активный путь на каждой генерации):
-```
-apps/api/app/tasks/generate_task.py:214-215   save_document(...)
-apps/api/app/tasks/generate_task.py:337-344   save_export(..., status="completed", ...)
-```
+---
 
-`status="completed"` пишется буквально той же строкой, которую фильтрует
-`count_exports_this_month` (`status=eq.completed`) — контракт между писателем и читателем
-совпадает дословно, не по предположению.
+## Разбор по трём вопросам владельца
 
-**Важная деталь:** `save_export` вызывается только `if user_id:` (`generate_task.py:335`) —
-анонимные генерации (free-tier без входа, H17/раздел 18) в `exports` не попадают вовсе.
-Это согласуется с архитектурой: квота считается только для аутентифицированных пользователей.
+### Вопрос 3 (проверен первым — он самый быстрый и потенциально самый серьёзный)
 
-### 2. Готовой отдельной миграции — **нет**. Но SQL уже написан и подтверждён кодом
+**Читает ли `billing_service.py` из другого проекта/конфигурации Supabase, чем пишет
+`generate_task.py`?**
 
-```
-apps/ai-playbook/supabase/migrations/
-├── 20250604_user_profiles.sql       -- только user_profiles (применена, H2)
-└── 20260612_stripe_customer_id.sql  -- только колонка (применена, H2)
-```
+**Нет. Опровергнуто строго.** Оба сервиса Railway, между которыми разделены чтение и
+запись, используют **byte-identical** конфигурацию:
 
-Отдельного `NNNNNN_documents_exports.sql` в `migrations/` **нет**.
-
-Но это **не** случай «работа забыта и нужно писать с нуля» (вариант 3 брифа). Определения
-`documents`/`exports` уже существуют дословно в `apps/ai-playbook/supabase/schema.sql`
-(3955 байт, комментарий в шапке: `-- Run this in Supabase SQL Editor`) — файл, отдельный
-от неверного черновика `apps/ai-playbook/docs/supabase-schema.sql` (3701 байт, тот самый,
-что был по ошибке применён к проду и создал `profiles` вместо `user_profiles`, см. H2).
-
-**Проверено построчно: колонки в `schema.sql` совпадают с тем, что шлёт код, без единого
-расхождения:**
-
-| Таблица | Колонки в `schema.sql` | Колонки, которые пишет код |
+| | `ai-playbook-generator (api)` — читает квоту | `confident-vibrancy (work)` — пишет exports |
 |---|---|---|
-| `documents` | `id, user_id, title, prompt, document_type, document_ir, created_at, updated_at` | `save_document`: `id, user_id, title, prompt, document_type, document_ir` — подмножество, остальное — дефолты |
-| `exports` | `id, document_id, user_id, theme_id, status, page_count, model, input_tokens, output_tokens, created_at` | `save_export`: те же 9 полей один в один |
+| `SUPABASE_URL` | `https://hheqekekzthcgnecwvsh.supabase.co` | `https://hheqekekzthcgnecwvsh.supabase.co` |
+| `sha256(SUPABASE_SERVICE_ROLE_KEY)` | `752fef80b37f3ce157c4ac52e736255b9a2c5eafdb25f4e607460b293628106e` | тот же хэш |
 
-FK `exports.document_id → documents(id)` также используется кодом: `get_user_exports`
-запрашивает вложенный ресурс `documents(title,prompt)` через этот же PostgREST-синтаксис
-embed — то есть связь в схеме и связь, которую ожидает код, — одна и та же.
+Хэш посчитан на месте, сырой ключ никогда не печатался. Совпадение хэшей означает
+побайтовое совпадение значения — не «похожий», а **тот же самый** ключ к тому же
+самому проекту. Гипотеза «класс ошибки как с `profiles`/`user_profiles`, но про
+адрес, а не про имя» — закрыта, это не она.
 
-**Вывод по пункту 2: не «забытая работа» и не «переименовать код» — это «SQL существует,
-но никогда не был выделен в отдельную миграцию и не применён».**
+### Вопрос 2: совпадает ли точный запрос подсчёта с тем, что реально пишется
 
-### 3. Прод-БД — **не проверено мной, доступа нет**
+**Да, совпадает дословно там, где сравнение вообще происходит:**
 
-Как и в H22: `supabase projects list` → `Access token not provided` (перепроверено в этой
-сессии заново, на случай что что-то изменилось — не изменилось). `pg_dump`/`psql` на машине
-по-прежнему отсутствуют. Я не заявляю о состоянии прод-БД то, что не проверил сам.
+- Запись (`generate_task.py:340`): `status="completed"` — ровно эта строка.
+- Чтение (`billing_service.py:128`): `"status": "eq.completed"` — тот же литерал.
 
-**Нужно от владельца перед применением** — та же команда, что нашла `profiles` вместо
-`user_profiles`:
+Дата: запись полагается на `default now()` колонки `created_at` (не передаётся явно,
+`supabase_service.py:59-98`); чтение фильтрует `created_at=gte.<начало месяца UTC>`.
+Расхождений типов/поясов не найдено — `timestamptz` хранится в UTC независимо от того,
+как её печатает клиент.
+
+**Но этот путь оказался не тем местом, где ломается H23** — см. корень ниже: сравнение
+никогда не доходит до выполнения.
+
+### Вопрос 1: есть ли строки в `exports` — точный запрос для владельца
+
+Дать однозначный ответ я не могу (нет доступа к прод-БД), но теперь, когда найден
+реальный корень, могу сказать, **что означает любой из двух возможных результатов**:
+
 ```sql
-select table_name from information_schema.tables where table_schema = 'public';
+select count(*) from exports;
+select count(*) from exports where status = 'completed';
+select id, user_id, status, created_at from exports order by created_at desc limit 20;
 ```
-Если в списке уже есть `documents`/`exports` под этими именами — **не применять**, а
-показать мне схему найденных таблиц (я сверю колонки, как делал по `profiles`). Если их
-нет вовсе (наиболее вероятный сценарий, раз для них никогда не было incremental-миграции) —
-применять SQL из раздела «Что применять» ниже.
 
-### 4. Вывод
-
-**Не вариант 1** (готовая миграция, бери и применяй как файл) — файла с именем миграции
-нет. **Не вариант 3 в чистом виде** (миграции нет вовсе, нужно решение, что там должно
-быть) — структура уже полностью определена и на 100% подтверждена совпадением с кодом,
-гадать не нужно. Это промежуточный, третий случай: **SQL существует и верифицирован, но
-никогда не был оформлен как применяемая миграция.**
+- **Если строки есть** (вероятно, если хоть один вошедший в аккаунт пользователь уже
+  сгенерировал документ) — это ожидаемо: запись в `exports` **не зависит** от флага
+  ниже, она безусловна при наличии `user_id` (`generate_task.py:335,212`). Значит
+  данные для будущего enforcement уже накапливаются, просто пока никем не читаются
+  для решения о лимите.
+- **Если строк нет** — скорее всего, реальный прод-трафик анонимный (free-tier без
+  входа, ожидаемо по H17/разделу 18: анонимная генерация — осознанный путь), и
+  `if user_id:` просто ни разу не сработало на бою. Само по себе это не баг H23.
 
 ---
 
-## Что применять (после проверки прод-БД по пункту 3, если таблиц там нет)
+## Найденный корень: `count_exports_this_month` **не вызывается вообще**
 
-Ниже — **дословный** блок `documents`+`exports` из `apps/ai-playbook/supabase/schema.sql`
-(строки 6-70), **без изменений**. Секция `user_profiles` из конца того же файла (строки
-72-89) **намеренно не включена** — она уже применена миграцией `20250604_user_profiles.sql`,
-и повторный прогон `create policy` (в отличие от `create table if not exists`) **упадёт с
-ошибкой «policy already exists»**, потому что `CREATE POLICY` не поддерживает `IF NOT
-EXISTS`. Не запускайте `schema.sql` целиком — только блок ниже.
+`billing_service.py:149-163`:
 
-```sql
--- ── Documents ────────────────────────────────────────────────
-create table if not exists documents (
-  id            uuid primary key default gen_random_uuid(),
-  user_id       uuid not null references auth.users(id) on delete cascade,
-  title         text not null default 'Untitled',
-  prompt        text not null default '',
-  document_type text not null default 'playbook',
-  document_ir   jsonb,
-  created_at    timestamptz not null default now(),
-  updated_at    timestamptz not null default now()
-);
-
-alter table documents enable row level security;
-
-create policy "Users can view their own documents"
-  on documents for select using (auth.uid() = user_id);
-
-create policy "Users can insert their own documents"
-  on documents for insert with check (auth.uid() = user_id);
-
-create policy "Service role bypasses RLS"
-  on documents for all using (true) with check (true);
-
-
--- ── Exports ──────────────────────────────────────────────────
-create table if not exists exports (
-  id             uuid primary key default gen_random_uuid(),
-  document_id    uuid references documents(id) on delete set null,
-  user_id        uuid not null references auth.users(id) on delete cascade,
-  theme_id       text not null default 'minimal-light',
-  status         text not null default 'pending',
-  page_count     integer,
-  model          text,
-  input_tokens   integer,
-  output_tokens  integer,
-  created_at     timestamptz not null default now()
-);
-
-alter table exports enable row level security;
-
-create policy "Users can view their own exports"
-  on exports for select using (auth.uid() = user_id);
-
-create policy "Users can insert their own exports"
-  on exports for insert with check (auth.uid() = user_id);
-
-create policy "Service role bypasses RLS on exports"
-  on exports for all using (true) with check (true);
-
-
--- ── Indexes ──────────────────────────────────────────────────
-create index if not exists idx_documents_user_id on documents(user_id);
-create index if not exists idx_exports_user_id   on exports(user_id);
-create index if not exists idx_exports_doc_id    on exports(document_id);
-
-
--- ── Privileges (required for API Worker + logged-in History) ─
-grant all on table public.documents to service_role;
-grant all on table public.exports to service_role;
-
-grant select, insert, update on table public.documents to authenticated;
-grant select, insert, update on table public.exports to authenticated;
+```python
+async def get_entitlements(user_id: str | None) -> Entitlements:
+    enforced = settings.billing_enforce and not settings.is_development
+    ...
+    used = await count_exports_this_month(user_id) if enforced else 0
+    return Entitlements(..., exports_used=used, exports_limit=limit if enforced else None, ...)
 ```
 
-### Что проверить «до» (шаг 1c выше, обязательно первым)
+`config.py:65`: **`billing_enforce: bool = False`** — дефолт выключен.
 
-```sql
-select table_name from information_schema.tables where table_schema = 'public';
+Проверено на самом проде (`railway variables`, значения — не секреты, это флаг и
+окружение, не ключи):
+
 ```
-Ожидание: `documents` и `exports` в списке отсутствуют (наравне с уже подтверждённым
-`user_profiles`, который там есть).
-
-### Что проверить «после»
-
-```sql
-select count(*) from documents;   -- ожидание: 0 (таблица только создана)
-select count(*) from exports;     -- ожидание: 0
-select column_name, data_type from information_schema.columns
-  where table_name = 'documents' order by ordinal_position;
-select column_name, data_type from information_schema.columns
-  where table_name = 'exports' order by ordinal_position;
+ai-playbook-generator (api):
+  BILLING_ENFORCE      = (не задана)   -> settings.billing_enforce = False (дефолт)
+  APP_ENV              = production
+  FREE_MONTHLY_EXPORTS = (не задана)
+  PRO_MONTHLY_EXPORTS  = (не задана)
 ```
-Ожидание по колонкам — ровно список из таблицы сопоставления в пункте 2 выше.
 
-### Снапшот
+`BILLING_ENFORCE` в Railway **не выставлена**. Поскольку дефолт в коде — `False`,
+`enforced` вычисляется в `False` **независимо от того, что схема БД, таблицы,
+колонки, фильтр и статус — всё абсолютно верно.** Функция `count_exports_this_month`
+просто никогда не вызывается ни для одного пользователя, ни разу — не потому что
+что-то падает, а потому что код так и написан: «если enforcement выключен — не
+считать, отдать `used=0, limit=None` сразу».
 
-Как и в H22 — Supabase free-tier автобэкапов не делает. Если решите применять,
-предварительно экспортируйте текущее состояние (в данном случае это `CREATE TABLE`,
-а не `ALTER` существующей таблицы с данными — риск ниже, чем был у H2, но привычка
-снимать снапшот перед любой записью в прод-схему не меняется).
+Это объясняет наблюдение из H23 один в один, и это не связано ни с миграциями,
+ни со схемой, ни с проектом Supabase, ни с самим SQL-запросом — все они оказались
+ни при чём. Единственная переменная, которая имеет значение, — фиче-флаг.
+
+### Почему это не «баг», а осознанный fail-open по умолчанию
+
+Дефолт `False` — тот же архитектурный принцип, что и весь остальной pre-launch
+код проекта (raздел 10 ORCHESTRATOR.md: «промах дешевле ложного срабатывания»,
+только применённый здесь к биллингу, а не к валидатору): пока флаг не поднят явно,
+никто не будет заблокирован лимитом по ошибке конфигурации. Это разумно для
+pre-launch, но означает, что **у квоты Free нет автоматического включения** — кто-то
+должен явно решить, что пора.
 
 ---
 
-## Что это значит для H1 (Stripe) — не меняется относительно раздела 18
+## Что нужно, чтобы квота заработала — решение владельца, не факт кода
 
-После применения этого блока `count_exports_this_month` начнёт видеть реальные строки,
-`can_generate` начнёт реально ограничивать Free-план — квота заработает. До этого момента
-включать Stripe по-прежнему не имеет смысла (Pro не отличается от Free по объёму).
+**Одна переменная окружения на сервисе `ai-playbook-generator (api)` в Railway:**
+
+```
+BILLING_ENFORCE=true
+```
+
+(и, вероятно, `FREE_MONTHLY_EXPORTS=<число>` — сейчас тоже не задана; без неё
+`_plan_limits("free")` вернёт `settings.free_monthly_exports` — нужно посмотреть
+дефолт этого поля в `config.py`, чтобы понять, разумен ли он для запуска.)
+
+**Это НЕ техническая правка, это продуктовое включение биллинга** — с того момента,
+как флаг встанет в `true`, Free-пользователи реально начнут упираться в лимит и
+получать `402` (`assert_can_generate`, `billing_service.py:174-178`). Оркестратор
+эту переменную сам не выставляет — по протоколу это решение владельца, тот же класс
+действия, что активация Stripe (H1).
+
+**Схема и код готовы к этому уже сейчас** — миграций, правок кода или проверок
+больше не требуется. Единственное действие — этот флаг (и, возможно, лимит), когда
+владелец решит, что пора включать enforcement.
+
+---
+
+## Урок протокола (записан честно, включая свою ошибку)
+
+Диагностика с тремя обязательными пунктами, один из которых требует недоступного
+Оркестратору канала (прод-БД), не может считаться завершённой, если этот пункт
+пропущен — даже когда два других дают складную историю. Предыдущая версия этого
+документа сделала ровно эту ошибку: заметила «нет отдельной миграции», нашла
+похожий на правду нарратив («SQL не выделен в файл») и не остановилась на факте
+«прод-БД не проверена», а фактически подставила на его место домысел. Впредь:
+если диагностика содержит пункт «проверить X», а X проверить нельзя — вывод
+диагностики обязан явно говорить «неизвестно» по этому пункту, а не строить
+заключение на оставшихся двух.
