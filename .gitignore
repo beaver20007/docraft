@@ -15,6 +15,11 @@ Desktop.ini
 .env.*
 !.env.example
 
+# Node / Playwright QA
+node_modules/
+test-results/
+playwright-report/
+
 # Python (if tools added later)
 __pycache__/
 *.py[cod]

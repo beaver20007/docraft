@@ -1,0 +1,11 @@
+{
+  "name": "docraft-qa-stripe-billing",
+  "private": true,
+  "description": "QA-only: webhook -> /billing/entitlements check. Not a product dependency.",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.49.1"
+  }
+}
